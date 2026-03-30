@@ -1,0 +1,15 @@
+services:
+
+  app:
+    container_name: jarvis
+    restart: always
+    tty: true
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - VERSION=${VERSION}
+    env_file:
+      - .env
+    ports:
+      - '8080:80'
