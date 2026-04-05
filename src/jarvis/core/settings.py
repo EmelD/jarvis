@@ -5,6 +5,10 @@ class ApplicationSettings(BaseSettings):
     VERSION: str = "0.0.0"
 
 
+class BotSettings(BaseSettings):
+    TELEGRAM_BOT_TOKEN: str = ""
+
+
 class LLMSettings(BaseSettings):
     MODEL_NAME: str = ""
     GOOGLE_API_KEY: str = ""
@@ -15,4 +19,5 @@ class LLMSettings(BaseSettings):
 
 
 app_settings = ApplicationSettings()
+bot_settings = BotSettings()
 llm_settings = LLMSettings()
