@@ -1,11 +1,25 @@
+import os
+import signal
+
 from aiogram import Router, types, F
 from aiogram.filters import Command
 
 from jarvis.apps.agents import jarvis_agent
 from jarvis.bot.keyboards import get_main_keyboard
+from jarvis.core.settings import bot_settings
 
 
 router = Router()
+
+
+@router.message(Command("shutdown"))
+async def cmd_shutdown(message: types.Message):
+    if message.from_user.id != bot_settings.ADMIN_ID:
+        return await message.answer("You don't have permissions to run that command.")
+
+    await message.answer("Shutdown Signal Accepted. Stopping all processes...")
+
+    os.kill(os.getpid(), signal.SIGTERM)
 
 
 @router.message(Command("start"))
