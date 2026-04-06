@@ -1,15 +1,53 @@
 services:
 
-  app:
+  calendar_mcp:
+    container_name: calendar_mcp
+    restart: always
+    tty: true
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: calendar_mcp
+    env_file:
+      - .env
+    ports:
+      - '8081:80'
+
+  todoist_mcp:
+    container_name: todoist_mcp
+    restart: always
+    tty: true
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: todoist_mcp
+    env_file:
+      - .env
+    ports:
+      - '8082:80'
+
+  agent:
     container_name: jarvis
     restart: always
     tty: true
     build:
       context: .
       dockerfile: Dockerfile
+      target: agent
       args:
         - VERSION=${VERSION}
     env_file:
       - .env
     ports:
       - '8080:80'
+
+  bot:
+    container_name: bot
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: bot
+    env_file:
+      - .env
+    depends_on:
+      - agent

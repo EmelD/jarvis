@@ -1,23 +1,39 @@
-FROM python:3.13-slim AS builder
+FROM python:3.13-slim AS base
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+WORKDIR /app
 
+
+FROM base AS builder
 RUN pip install --upgrade pip && pip install uv
-
-WORKDIR /app
-
 COPY pyproject.toml uv.lock ./
+RUN uv venv && uv sync --frozen --no-dev
 
-RUN uv venv && uv sync
 
-FROM python:3.13-slim
-
-WORKDIR /app
-
+FROM base AS agent
 COPY --from=builder /app/.venv /app/.venv
-
-COPY ./src/jarvis ./jarvis
-
 ENV PATH="/app/.venv/bin:$PATH"
-
+COPY src/jarvis ./jarvis
 EXPOSE 80
-
 CMD ["uvicorn", "jarvis.main:app", "--host", "0.0.0.0", "--port", "8080"]
+
+
+FROM base AS bot
+COPY --from=builder /app/.venv /app/.venv
+ENV PATH="/app/.venv/bin:$PATH"
+COPY src/jarvis ./jarvis
+CMD ["python", "-m", "jarvis.bot.main"]
+
+
+FROM base AS calendar_mcp
+COPY --from=builder /app/.venv /app/.venv
+ENV PATH="/app/.venv/bin:$PATH"
+COPY src/jarvis ./jarvis
+CMD ["uvicorn", "jarvis.apps.google_calenar.mcp:app", "--host", "0.0.0.0", "--port", "8081"]
+
+
+FROM base AS todoist_mcp
+COPY --from=builder /app/.venv /app/.venv
+ENV PATH="/app/.venv/bin:$PATH"
+COPY src/jarvis ./jarvis
+CMD ["uvicorn", "jarvis.apps.todoist.mcp:app", "--host", "0.0.0.0", "--port", "8082"]
