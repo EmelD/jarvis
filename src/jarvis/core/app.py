@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from jarvis.api.routes import api_router
+from jarvis.core.mcp_manager import mcp_manager
 from jarvis.core.lifespan import started, starting, stopped, stopping
 from jarvis.core.exceptions import register_exception_handler
 from jarvis.core.settings import app_settings
@@ -18,11 +19,13 @@ def create_application() -> FastAPI:
 
     @asynccontextmanager
     async def app_state_lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+        await mcp_manager.start_all()
         started()
 
         yield
 
         stopping()
+        await mcp_manager.stop_all()
         stopped()
 
     app = FastAPI(
