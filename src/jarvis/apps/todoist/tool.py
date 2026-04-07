@@ -1,9 +1,9 @@
 import mcp.types as types
 
-from jarvis.apps.todoist.app import app
+from jarvis.apps.todoist.app import mcp
 
 
-@app.tool(
+@mcp.tool(
     name="get_today_tasks",
     description=(
         ""
