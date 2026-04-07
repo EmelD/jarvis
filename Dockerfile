@@ -15,7 +15,7 @@ COPY --from=builder /app/.venv /app/.venv
 ENV PATH="/app/.venv/bin:$PATH"
 COPY src/jarvis ./jarvis
 EXPOSE 80
-CMD ["uvicorn", "jarvis.main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["uvicorn", "jarvis.main:app", "--host", "0.0.0.0", "--port", "80"]
 
 
 FROM base AS bot
@@ -29,11 +29,11 @@ FROM base AS calendar_mcp
 COPY --from=builder /app/.venv /app/.venv
 ENV PATH="/app/.venv/bin:$PATH"
 COPY src/jarvis ./jarvis
-CMD ["uvicorn", "jarvis.apps.google_calenar.mcp:app", "--host", "0.0.0.0", "--port", "8081"]
+CMD ["uvicorn", "jarvis.apps.google_calendar.app:app", "--host", "0.0.0.0", "--port", "80"]
 
 
 FROM base AS todoist_mcp
 COPY --from=builder /app/.venv /app/.venv
 ENV PATH="/app/.venv/bin:$PATH"
 COPY src/jarvis ./jarvis
-CMD ["uvicorn", "jarvis.apps.todoist.mcp:app", "--host", "0.0.0.0", "--port", "8082"]
+CMD ["uvicorn", "jarvis.apps.todoist.app:app", "--host", "0.0.0.0", "--port", "80"]

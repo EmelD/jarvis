@@ -1,9 +1,9 @@
 import mcp.types as types
 
-from jarvis.apps.google_calendar.app import app
+from jarvis.apps.google_calendar.app import mcp
 
 
-@app.tool(
+@mcp.tool(
     name="get_today_events",
     description=(
         ""
