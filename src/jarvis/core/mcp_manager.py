@@ -3,6 +3,7 @@ import httpx
 from enum import Enum
 from contextlib import AsyncExitStack
 from mcp import ClientSession
+from mcp.client.sse import sse_client
 from langchain_core.tools import Tool
 
 logger = logging.getLogger(__name__)
@@ -38,8 +39,28 @@ class MCPManager:
                         logger.warning(f"Server {name} is lost.")
                     self.server_statuses[name] = ServerStatus.OFFLINE
 
+    async def _connect_server(self, name: str, url: str) -> bool:
+        try:
+            read, write = await self._exit_stack.enter_async_context(sse_client(url))
+            session = await self._exit_stack.enter_async_context(ClientSession(read, write))
+            await session.initialize()
+            
+            mcp_tools = await session.list_tools()
+            for mcp_tool in mcp_tools.tools:
+                langchain_tool = self._make_langchain_tool(session, mcp_tool)
+                if not any(t.name == langchain_tool.name for t in self.tools):
+                    self.tools.append(langchain_tool)
+            
+            logger.info(f"MCP server '{name}' has been started.")
+            return True
+        except Exception as e:
+            logger.error(f"Error on starting '{name}' MCP server: {e}")
+            return False
+
     async def _reconnect_server(self, name: str):
-        pass
+        url = self._server_registry.get(name)
+        if url:
+            await self._connect_server(name, url)
 
     def register_server(self, name: str, url: str):
         self._server_registry[name] = url
@@ -55,13 +76,8 @@ class MCPManager:
 
         started = 0
         for name, url in self._server_registry.items():
-            try:
-                # connection logic
-
+            if await self._connect_server(name, url):
                 started += 1
-                logger.info(f"MCP server '{name}' has been started.")
-            except Exception as e:
-                logger.error(f"Error on starting '{name}' MCP server: {e}")
 
         logger.info(f"{started} MCP servers has been started.")
 
