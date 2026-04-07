@@ -6,9 +6,6 @@ from jarvis.bot.handlers import router
 from jarvis.core.settings import bot_settings
 
 
-mcp_manager = None
-
-
 async def on_startup(bot: Bot):
     logging.info("Starting bot: resources initialisation...")
 

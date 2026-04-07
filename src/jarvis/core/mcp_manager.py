@@ -3,7 +3,6 @@ import httpx
 from enum import Enum
 from contextlib import AsyncExitStack
 from mcp import ClientSession
-from mcp.client.stdio import stdio_client
 from langchain_core.tools import Tool
 
 logger = logging.getLogger(__name__)
